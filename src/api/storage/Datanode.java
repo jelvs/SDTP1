@@ -28,4 +28,5 @@ public interface Datanode {
 	@Path("/{block}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	byte[] readBlock(@PathParam("block") String block);
+	// 200 OK | 404 Not Found
 }

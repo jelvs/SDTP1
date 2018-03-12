@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.chrylis:base58-codec:1.2.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/chrylis/base58-codec/1.2.0/base58-codec-1.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/chrylis/base58-codec/1.2.0/base58-codec-1.2.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/chrylis/base58-codec/1.2.0/base58-codec-1.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
