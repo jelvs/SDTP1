@@ -5,6 +5,8 @@
 O objetivo do trabalho é desenvolver um sistema de processamento distribuído de dados textuais, baseado no paradigma MapReduce.
 Envolverá (1) implementar um repositório distribuído para armazenar os dados a processar e o código fonte Java dos programas MapReduce a executar; (2) adaptar uma solução MapReduce existente, centralizada, afim de tirar partido da distribuição.
 
+![alt text](http://asc.di.fct.unl.pt/sd/labs/tp1/tp1-arquitectura.png) 
+
 # MapReduce (Paradigma)
 
 Um programa MapReduce centra-se em duas funções: map e reduce. Usualmente, a função map é usada para transformar ou filtrar os dados de entrada, enquanto que a função reduce produz uma agregação dos dados intermédios produzidos pela função map.
