@@ -34,7 +34,7 @@ O código fonte Java dos programas MapReduce será também lido (e compilado) a 
 
 Uma computação MapReduce tem como base um código fonte, escrito em Java, e guardado no repositório num blob. Os dados de entrada da computação serão obtidos do repositório e têm como alvo um número variável de blobs cujo nome contém um prefixo dado como parâmetro da computação. Eventuais dados de saída serão escritos num ou mais blobs, construindo o seu nome também com base num prefixo.
 
-In [ ]:
+### In [ ]:
 void MapReduceEngine.execute( String jobClassBlob, String inputPrefix , String outputPrefix );
 
 A versão centralizada do motor de execução fornecido caracteriza-se por correr integralmente no cliente que puxa os dados integralmente para executar os programas MapReduce. Esta versão tem como objetivo descrever as fases de execução MapReduce e como o repositório é explorado para esse fim. Nomeadamente, ilustra como se tira partido da possibilidade dada pelo repositório de agregar nomes de blobs com base num prefixo.
@@ -55,17 +55,27 @@ A solução a desenvolver deve implementar um conjunto de funcionalidades base c
 ## Funcionalidades Base
 
 Serviços Namenode & Datanode implementados usando tecnologia REST Jersey JAX-RS; €€€
+
 Estado dos Datanodes persistente em memória secundária local (disco); €
+
 Biblioteca cliente funcional para acesso a um repositório remoto constituído por um Namenode e vários Datanodes; €€
+
 Tolerar falhas de comunicação temporárias; €
+
 Auto-configuração; €
+
 Dado um grupo IP multicast e porto, pré-combinados, os componentes deverão responder a uma mensagem contendo o seu nome lógico ("Namenode" ou "Datanode") com o respetivo URI. Com este mecanismo, suportar a auto-organização do repositório e descoberta do repositório pelos clientes essa camada.
+
 Nota: Cumprindo os requisitos acima, o motor MapReduce fornecido deverá poder operar com um repositório remoto (ainda que a computação se faça centralizadamente no cliente)
 
 ## Funcionalidades Opcionais (Valorativas)
 
 Motor MapReduce descentralizado. €€€
+
 Suporte da execução remota (e distribuída) do motor MapReduce, conforme a interface WebServices SOAP indicada abaixo. €€
+
 Explorar a afinidade entre dados e as tarefas MapReduce (localidade dos dados) €€€
+
 Garbage Collection. €
+
 Remoção de blocos não alcançáveis, não pertencentes a nenhum blob presente no Namenode.
