@@ -2,7 +2,6 @@ package sys.storage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.collections4.Trie;
@@ -37,7 +36,7 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void delete(String prefix) {
-		Set<String> keys = names.prefixMap( prefix ).keySet();
+		List<String> keys = new ArrayList<>(names.prefixMap( prefix ).keySet());
 		if( ! keys.isEmpty() )
 			names.keySet().removeAll( keys );
 	}

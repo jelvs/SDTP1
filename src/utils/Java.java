@@ -28,7 +28,7 @@ import javax.tools.ToolProvider;
 public class Java {
 	private static ByteClassLoader loader = new ByteClassLoader();
 	
-	public static <T> Class<T> compile(String className, String source) {
+	synchronized public static <T> Class<T> compile(String className, String source) {
 		try {
 			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 			DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();

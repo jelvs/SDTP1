@@ -1,4 +1,4 @@
-package test;
+package test.mapreduce;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -11,49 +11,50 @@ import utils.Random;
 
 public class LocalMapReduceTest {		
 		
+		private static final int MAX_PARTITION_SIZE = 6;
+
 		/*
-		 * 1) Creates a local (in memory) storage to store blobs in memory.
+		 * Executes a MapReduce computation using the BlobStorage implementation.
 		 * 
-		 * 2) Creates a blob in local storage with the MapReduce program: WordCount.java
+		 * It should be possible to run computation just by replacing the LocalBlobStorage implementation with your own (backed by the servers).
 		 * 
-		 * 3) Creates a blob in local storage with a text document: "lusiadas.txt"
-		 * 
-		 * 4) Executa o WordCount sobre os blobs contendo os lusiadas e escreve os resultados num blob.
-		 *    
-		 *    
-		 *  If instead of a LocalBlobStorage you implement a RemoteBlobStorage,
-		 *  that uses the Namenode e Datanodes to store the blobs, the MapReduce
-		 *  computation should run without any changes.
 		 */
 		public static void main(String[] args) throws Exception {
 
+			//1. Get the storage implementation. Replace with your own implementation...
 			BlobStorage storage = new LocalBlobStorage();
-			
+
+			//2. Copy all lines of WordCount.java to a blob named WordCount.
 			BlobWriter src = storage.blobWriter("WordCount");
 			Files.readAllLines(new File("WordCount.java").toPath())
 				.stream().forEach( src::writeLine );
 			src.close();
 
+			//3. Do same to files doc-1 and doc-2
 			for( String doc : new String[] {"doc-1", "doc-2"}) {
 				BlobWriter out = storage.blobWriter(doc);
-				Files.readAllLines(new File(doc + ".txt").toPath())
-				.stream().forEach( out::writeLine );
+				Files.readAllLines(new File(doc + ".txt").toPath()).stream().forEach( out::writeLine );
 				out.close();
 			}
-			
+			//4. Check the contents of the doc-X files are in storage.
 			storage.listBlobs("doc-").stream().forEach( blob -> {
 				storage.readBlob(blob).forEach( System.out::println );
 			});
 			
+			//5. Make sure there are no blobs in storage whose names start with "results-"
 			storage.deleteBlobs("results-");
-			
+
+			//6. Make an pseudo-unique prefix for our computation 
 			String jobID = Random.key64();
 			String outputBlob = "results-" + jobID;
 			
+			//7. Perform the WordCount computation, over the two blobs named "doc-*"
 			MapReduceEngine engine = new MapReduceEngine( "local", storage);
-			engine.executeJob("WordCount", "doc-", outputBlob);
-					
+			engine.executeJob("WordCount", "doc-", outputBlob, MAX_PARTITION_SIZE);
+
+			//8. Check the results. The results will be written in one of more partitions of the given maximum size.
 			storage.listBlobs(outputBlob).stream().forEach( blob -> {
+				//Print this partition blob name.
 				System.out.println(blob);
 				storage.readBlob(blob).forEach( System.out::println );
 			});			

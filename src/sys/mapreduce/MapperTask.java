@@ -1,8 +1,7 @@
 package sys.mapreduce;
 
 import java.util.Map;
-
-import org.jboss.netty.util.internal.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;

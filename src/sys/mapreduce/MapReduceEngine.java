@@ -11,8 +11,6 @@ import jersey.repackaged.com.google.common.collect.Lists;
 
 public class MapReduceEngine {
 
-	private static final int PARTITION_SIZE = 6;
-	
 	final String worker;
 	final BlobStorage storage;
 	
@@ -21,7 +19,7 @@ public class MapReduceEngine {
 		this.storage = storage;
 	}
 	
-	public void executeJob( String jobClassBlob, String inputPrefix, String outputPrefix ) {
+	public void executeJob( String jobClassBlob, String inputPrefix, String outputPrefix, int outputPartitionSize ) {
 		new MapperTask(worker, storage, jobClassBlob, inputPrefix, outputPrefix).execute();
 		
 		Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
@@ -30,7 +28,7 @@ public class MapReduceEngine {
 		
 		
 		AtomicInteger partitionCounter = new AtomicInteger(0);
-		Lists.partition( new ArrayList<>( reduceKeyPrefixes), PARTITION_SIZE).forEach(partitionKeyList -> {
+		Lists.partition( new ArrayList<>( reduceKeyPrefixes), outputPartitionSize).forEach(partitionKeyList -> {
 				
 				String partitionOutputBlob = String.format("%s-part%04d", outputPrefix, partitionCounter.incrementAndGet());
 				
