@@ -43,18 +43,69 @@ public class LocalBlobStorage implements BlobStorage {
             return data;
         } else
             System.err.println(response.getStatus());
-            return new ArrayList<String>();
+        return new ArrayList<String>();
 
     }
 
     @Override
     public void deleteBlobs(String prefix) {
-        namenode.list(prefix).forEach(blob -> {
-            namenode.read(blob).forEach(block -> {
-                datanodes[0].deleteBlock(block);
+        List<String> blobs = listBlobs(prefix);
+        blobs.forEach(blob -> {
+
+            ClientConfig config = new ClientConfig();
+            Client client = ClientBuilder.newClient(config);
+
+            URI baseURI = UriBuilder.fromUri(namenode).build();
+            WebTarget target = client.target(baseURI);
+
+            Response response = target.path("/namenode/" + blob)
+                    .request()
+                    .get();
+
+            List<String> blocks;
+
+            if (response.hasEntity()) {
+                blocks = response.readEntity(List.class);
+
+            } else
+                System.err.println(response.getStatus());
+            blocks = new ArrayList<String>();
+
+            blocks.forEach(block -> {
+
+
+                ClientConfig config2 = new ClientConfig();
+                Client client2 = ClientBuilder.newClient(config);
+
+                URI baseURI2 = UriBuilder.fromUri(datanodes[0]).build();
+                WebTarget target2 = client.target(baseURI);
+
+                Response response2 = target.path("/datanode/" + block)
+                        .request()
+                        .delete();
+                if( response2.getStatusInfo().equals(Response.Status.NO_CONTENT) ) {
+                    System.out.println( "deleted data resource...");
+                } else
+                    System.err.println( response2.getStatus() );
+
             });
         });
-        namenode.delete(prefix);
+
+        ClientConfig config3 = new ClientConfig();
+        Client client3 = ClientBuilder.newClient(config3);
+
+        URI baseURI3 = UriBuilder.fromUri(datanodes[0]).build();
+        WebTarget target3 = client3.target(baseURI3);
+
+        Response response3 = target3.path("/namenode/list/")
+                .queryParam("prefix", prefix)
+                .request()
+                .delete();
+        if( response3.getStatusInfo().equals(Response.Status.NO_CONTENT) ) {
+            System.out.println( "deleted data resource...");
+        } else
+            System.err.println( response3.getStatus() );
+
     }
 
     @Override
