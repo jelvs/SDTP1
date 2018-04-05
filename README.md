@@ -66,7 +66,7 @@ A solução a desenvolver deve implementar um conjunto de funcionalidades base c
 
 ## Funcionalidades Base
 
-Serviços Namenode & Datanode implementados usando tecnologia REST Jersey JAX-RS; €€€
+(CHECK)Serviços Namenode & Datanode implementados usando tecnologia REST Jersey JAX-RS; €€€
 
 Estado dos Datanodes persistente em memória secundária local (disco); €
 
