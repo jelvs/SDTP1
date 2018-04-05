@@ -30,36 +30,7 @@ public class DatanodeServer {
 
         System.err.println("Server ready....");
 
-        MulticastSocket socket = new MulticastSocket();
-
-        //Send multicast request with MESSAGE - Send up to three times
-        for (int retry = 0; retry < 3; retry++) {
-
-            try {
-
-                byte[] buffer = new byte[65536];
-                DatagramPacket url_packet = new DatagramPacket(buffer, buffer.length);
-                socket.setSoTimeout(SOCKET_TIMEOUT);
-
-                socket.receive(url_packet);
-
-                /*
-
-
-                Incompleto
-                falta completar
-
-                 */
-
-            } catch (SocketTimeoutException e) {
-                //No server responded within given time
-            } catch (IOException ex) {
-                //IO error
-            }
-        }
-
-        //Creating keepAlive thread
-        new Thread(new HeartBeat()).start();
+      
 
     }
 

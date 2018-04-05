@@ -47,7 +47,8 @@ public class LocalBlobStorage implements BlobStorage {
 
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void deleteBlobs(String prefix) {
         List<String> blobs = listBlobs(prefix);
         blobs.forEach(blob -> {
@@ -57,32 +58,33 @@ public class LocalBlobStorage implements BlobStorage {
 
             URI baseURI = UriBuilder.fromUri(namenode).build();
             WebTarget target = client.target(baseURI);
-
+            
             Response response = target.path("/namenode/" + blob)
                     .request()
                     .get();
 
             List<String> blocks;
-
+            
             if (response.hasEntity()) {
                 blocks = response.readEntity(List.class);
-
-            } else
+            } else {
                 System.err.println(response.getStatus());
-            blocks = new ArrayList<String>();
-
+                blocks = new ArrayList<String>();
+            }
+            
             blocks.forEach(block -> {
-
-
+            
+            	
                 ClientConfig config2 = new ClientConfig();
-                Client client2 = ClientBuilder.newClient(config);
+                Client client2 = ClientBuilder.newClient(config2);
 
                 URI baseURI2 = UriBuilder.fromUri(datanodes[0]).build();
-                WebTarget target2 = client.target(baseURI);
+                WebTarget target2 = client2.target(baseURI2);
 
-                Response response2 = target.path("/datanode/" + block)
+                Response response2 = target2.path("/datanode/" + block)
                         .request()
                         .delete();
+               
                 if( response2.getStatusInfo().equals(Response.Status.NO_CONTENT) ) {
                     System.out.println( "deleted data resource...");
                 } else
@@ -94,7 +96,7 @@ public class LocalBlobStorage implements BlobStorage {
         ClientConfig config3 = new ClientConfig();
         Client client3 = ClientBuilder.newClient(config3);
 
-        URI baseURI3 = UriBuilder.fromUri(datanodes[0]).build();
+        URI baseURI3 = UriBuilder.fromUri(namenode).build();
         WebTarget target3 = client3.target(baseURI3);
 
         Response response3 = target3.path("/namenode/list/")

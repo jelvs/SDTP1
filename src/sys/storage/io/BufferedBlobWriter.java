@@ -28,85 +28,87 @@ import javax.ws.rs.core.UriBuilder;
  *
  */
 public class BufferedBlobWriter implements BlobWriter {
-	final String name;
-	final int blockSize;
-	final ByteArrayOutputStream buf;
+    final String name;
+    final int blockSize;
+    final ByteArrayOutputStream buf;
 
-	final String namenode;
-	final String[] datanodes;
-	final List<String> blocks = new LinkedList<>();
+    final String namenode;
+    final String[] datanodes;
+    final List<String> blocks = new LinkedList<>();
 
-	public BufferedBlobWriter(String name, String namenode, String[] datanodes, int blockSize ) {
-		this.name = name;
-		this.namenode = "http://localhost:9091";
-		this.datanodes = new String[]{"http://localhost:9999"};
+    public BufferedBlobWriter(String name, String namenode, String[] datanodes, int blockSize) {
+        this.name = name;
 
-		this.blockSize = blockSize;
-		this.buf = new ByteArrayOutputStream( blockSize );
-	}
+        //HARDCoded para testar e ver se está a funcionar
 
-	private void flush( byte[] data, boolean eob ) {
+        this.namenode = "http://localhost:9091";
+        this.datanodes = new String[]{"http://localhost:9999"};
 
-		ClientConfig config = new ClientConfig();
-		Client client = ClientBuilder.newClient(config);
+        this.blockSize = blockSize;
+        this.buf = new ByteArrayOutputStream(blockSize);
+    }
 
-		URI baseURI = UriBuilder.fromUri(datanodes[0]).build();
-		WebTarget target = client.target( baseURI );
+    private void flush(byte[] data, boolean eob) {
 
-		Response response = target.path("/datanode/")
-				.request()
-				.post( Entity.entity( new byte[1024], MediaType.APPLICATION_OCTET_STREAM));
+        ClientConfig config = new ClientConfig();
+        Client client = ClientBuilder.newClient(config);
 
-		if( response.hasEntity() ) {
-			String id = response.readEntity(String.class);
-			System.out.println( "data resource id: " + id );
+        URI baseURI = UriBuilder.fromUri(datanodes[0]).build();
+        WebTarget target = client.target(baseURI);
+
+        Response response = target.path("/datanode/")
+                .request()
+                .post(Entity.entity(new byte[1024], MediaType.APPLICATION_OCTET_STREAM));
+
+        if (response.hasEntity()) {
+            String id = response.readEntity(String.class);
+            System.out.println("data resource id: " + id);
             blocks.add(id);
-		} else
-			System.err.println( response.getStatus() );
+        } else
+            System.err.println(response.getStatus());
 
 
+        if (eob) {
 
-		if( eob ) {
+            ClientConfig config2 = new ClientConfig();
+            Client client2 = ClientBuilder.newClient(config2);
 
-			ClientConfig config2 = new ClientConfig();
-			Client client2 = ClientBuilder.newClient(config);
+            URI baseURI2 = UriBuilder.fromUri(namenode).build();
+            WebTarget target2 = client2.target(baseURI2);
 
-			URI baseURI2 = UriBuilder.fromUri(namenode).build();
-			WebTarget target2 = client.target( baseURI );
+            Response response2 = target2.path("/namenode/" + name)
+                    .request()
+                    .post(Entity.entity(blocks, MediaType.APPLICATION_JSON_TYPE));
 
-			Response response2 = target.path("/namenode/" + name )
-					.request()
-					.post( Entity.entity( blocks , MediaType.APPLICATION_JSON_TYPE));
-
-			if( response.hasEntity() ) {
-				String id = response.readEntity(String.class);
-				System.out.println( "data resource id: " + id );
-			} else
-				System.err.println( response.getStatus() );
+            if (response2.hasEntity()) {
+                String id = response2.readEntity(String.class);
+                System.out.println("data resource id: " + id);
+            } else
+                System.err.println(response2.getStatus());
 
 
-			blocks.clear();
-		}
+            blocks.clear();
+        }
 
 		/*blocks.add( datanodes[0].createBlock(data)  );
 		if( eob ) {
 			namenode.create(name, blocks);
 			blocks.clear();
 		}*/
-	}
+    }
 
-	@Override
-	public void writeLine(String line) {
-		if( buf.size() + line.length() > blockSize - 1 ) {
-			this.flush(buf.toByteArray(), false);
-			buf.reset();
-		}
-		IO.write( buf, line.getBytes() );
-		IO.write( buf, '\n');
-	}
+    @Override
+    public void writeLine(String line) {
+        if (buf.size() + line.length() > blockSize - 1) {
+            this.flush(buf.toByteArray(), false);
+            buf.reset();
+        }
+        IO.write(buf, line.getBytes());
+        IO.write(buf, '\n');
+    }
 
-	@Override
-	public void close() {
-		flush( buf.toByteArray(), true );
-	}
+    @Override
+    public void close() {
+        flush(buf.toByteArray(), true);
+    }
 }
