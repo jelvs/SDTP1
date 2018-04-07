@@ -56,10 +56,7 @@ public class BufferedBlobReader implements BlobReader {
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
                 .get(List.class);
-        for(String x: response) {
-        	System.out.println("read: " + x);
-        	
-        }
+       
         this.blocks = response.iterator();
         this.lazyBlockIterator = new LazyBlockReader();
     }

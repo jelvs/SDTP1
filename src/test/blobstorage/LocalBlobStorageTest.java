@@ -7,7 +7,7 @@ import java.util.List;
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobReader;
 import api.storage.BlobStorage.BlobWriter;
-import sys.storage.LocalBlobStorage;
+import sys.storage.RestBlobStorage;
 
 public class LocalBlobStorageTest {		
 		
@@ -19,7 +19,7 @@ public class LocalBlobStorageTest {
 
 			System.out.println("\n teste1 \n");
 			//1. Get an implementation of the storage. LocalBlobStorage implements everything locally, in memory, sadly...
-			BlobStorage storage = new LocalBlobStorage();
+			BlobStorage storage = new RestBlobStorage();
 			
 			System.out.println("\n teste2 \n");
 			//2. We can list ALL the blobs already stored in the storage, using "" as the name prefix.

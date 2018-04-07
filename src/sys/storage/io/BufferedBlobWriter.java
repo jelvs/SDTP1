@@ -2,6 +2,7 @@ package sys.storage.io;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,16 +34,16 @@ public class BufferedBlobWriter implements BlobWriter {
     final ByteArrayOutputStream buf;
 
     final String namenode;
-    final String[] datanodes;
+    final List<String> datanodes;
     final List<String> blocks = new LinkedList<>();
 
-    public BufferedBlobWriter(String name, String namenode, String[] datanodes, int blockSize) {
+    public BufferedBlobWriter(String name, String namenode, ArrayList<String> datanodes, int blockSize) {
         this.name = name;
 
         //HARDCoded para testar e ver se está a funcionar
 
         this.namenode = "http://localhost:9091";
-        this.datanodes = new String[]{"http://localhost:9999"};
+        this.datanodes = new ArrayList<String>();
 
         this.blockSize = blockSize;
         this.buf = new ByteArrayOutputStream(blockSize);
@@ -53,7 +54,7 @@ public class BufferedBlobWriter implements BlobWriter {
         ClientConfig config = new ClientConfig();
         Client client = ClientBuilder.newClient(config);
 
-        URI baseURI = UriBuilder.fromUri(datanodes[0]).build();
+        URI baseURI = UriBuilder.fromUri(datanodes.get(0)).build();
         WebTarget target = client.target(baseURI);
 
         Response response = target.path("/datanode/")

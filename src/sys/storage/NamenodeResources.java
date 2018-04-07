@@ -17,9 +17,9 @@ import api.storage.Namenode;
  * 
  * Uses a trie to perform efficient prefix query operations.
  */
-public class NamenodeClient implements Namenode {
+public class NamenodeResources implements Namenode {
 
-	private static Logger logger = Logger.getLogger(NamenodeClient.class.toString() );
+	private static Logger logger = Logger.getLogger(NamenodeResources.class.toString() );
 	
 	Trie<String, List<String>> names = new PatriciaTrie<>();
 	
