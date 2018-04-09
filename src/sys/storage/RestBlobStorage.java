@@ -20,6 +20,7 @@ import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RestBlobStorage implements BlobStorage {
 	private static final int BLOCK_SIZE = 512;
@@ -37,10 +38,12 @@ public class RestBlobStorage implements BlobStorage {
 
 	static String namenode;
 	ArrayList<String> datanodes;
+	ConcurrentHashMap<String, String> datanodesMap;
 
 	public RestBlobStorage() {
 		this.namenode = null;
 		this.datanodes = new ArrayList<String>();
+		this.datanodesMap = new ConcurrentHashMap<>();
 		runMulticast();
 	}
 
@@ -136,25 +139,28 @@ public class RestBlobStorage implements BlobStorage {
 		return new BufferedBlobWriter(name, namenode, datanodes, BLOCK_SIZE);
 	}
 	private void runMulticast() {
-		while(datanodes.isEmpty() || namenode == null) {
+		while(datanodes.size() == 0 || namenode == null) {
 			try( MulticastSocket socket = new MulticastSocket(9000)) {
 
 
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 				socket.setSoTimeout(SOCKET_TIMEOUT);
-
-				multicastMessage(socket, MULTICAST_MESSAGE);
+				String message;
+				if(namenode == null) {
+					message = NAMENODE_MESSAGE;
+				}
+				else {
+					message = DATANODE_MESSAGE;
+				}
+				multicastMessage(socket, message);
 
 				socket.receive( request );
 
-				DiscoverData( request );
+				DiscoverData(request, message);
 
 				System.out.write( request.getData(), 0, request.getLength() ) ;
 				//prepare and send reply... (unicast)	
-
-
-
 
 				System.out.println("exit while\n");
 			} catch (SocketTimeoutException e) {
@@ -164,7 +170,38 @@ public class RestBlobStorage implements BlobStorage {
 				ex.printStackTrace();
 			}
 		}
+	
+		new Thread(() -> {
+			while(true) {
+				try( MulticastSocket socket = new MulticastSocket(9000)) {
 
+					byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
+					DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
+					socket.setSoTimeout(SOCKET_TIMEOUT);
+
+					multicastMessage(socket, DATANODE_MESSAGE);
+
+					socket.receive( request );
+
+					DiscoverData(request, DATANODE_MESSAGE );
+
+					System.out.write( request.getData(), 0, request.getLength() ) ;
+					//prepare and send reply... (unicast)	
+
+
+
+
+					System.out.println("exit while\n");
+				} catch (SocketTimeoutException e) {
+					System.out.println("Socket timeout!!!!!!");
+				} catch (IOException ex) {
+					//IO error
+					ex.printStackTrace();
+				}
+			}
+			
+
+		}).start();
 
 		//new Thread(new HeartBeat()).start();
 	}
@@ -173,22 +210,33 @@ public class RestBlobStorage implements BlobStorage {
 	/*
 	 * Filters the messages from Datanode & Namenode
 	 */
-	private void DiscoverData(DatagramPacket request) {
+	private void DiscoverData(DatagramPacket request, String localMessage) {
 		System.out.println("before if : " + request.getAddress());
 		System.out.println("Message : " + new String(request.getData()));
-		String message = new String(request.getData()).trim();
+		String message = new String(request.getData());
 
-		if(message.equals(DATANODE_MESSAGE)){
-
-			String url = String.format("http:/%s:%d", request.getAddress(), request.getPort());
+		if(localMessage.equals(DATANODE_MESSAGE)){
+			String url = String.format(message);
 			System.out.println("url : " + url);
-			addDataNodeServer(new String (request.getData()));
+			
+			if(!datanodes.isEmpty()) {
+				for (int i = 0; i < datanodes.size()-1; i++) {
+					if(datanodes.get(i).equals(url))
+						break;
+					
+					if(i == datanodes.size()-1) 
+						addDataNodeServer(url);	
+				}
+			}
+			else {
+			addDataNodeServer(url);
+			}
 
-		}else if(message.equals(NAMENODE_MESSAGE)) {
+		}else if(localMessage.equals(NAMENODE_MESSAGE)) {
 
-			String url = String.format("http:/%s:%d", request.getAddress(), request.getPort());
+			String url = String.format(message);
 			System.out.println("url : " + url);
-			addNameNodeServer(new String (request.getData()));
+			addNameNodeServer(url);
 		}else {
 			System.out.println("inside else....\n");
 		}
@@ -196,15 +244,9 @@ public class RestBlobStorage implements BlobStorage {
 
 
 
-	private static void multicastMessage(MulticastSocket socket, String message ) throws IOException {
-		String sendmessage;
+	private static void multicastMessage(MulticastSocket socket, String sendmessage) throws IOException {
+		
 		try {
-			if(namenode == null) {
-				sendmessage = NAMENODE_MESSAGE;
-			}
-			else {
-				sendmessage = DATANODE_MESSAGE;
-			}
 
 			byte[] input = sendmessage.getBytes();
 			DatagramPacket reply = new DatagramPacket(input, input.length);

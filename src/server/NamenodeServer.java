@@ -52,7 +52,7 @@ public class NamenodeServer {
 				//prepare and send reply... (unicast)
 				if(requested.equals("Namenode")) {
 					System.out.println(requested);
-				processMessage(socket, request, group);
+				processMessage(socket, request);
 				}
 
 			}    
@@ -65,7 +65,7 @@ public class NamenodeServer {
 	}
 
 
-	private static void processMessage(MulticastSocket socket, DatagramPacket request, InetAddress group) throws IOException {
+	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
 		//System.out.println("processMessage");
 		//System.out.println("x : " + new String(request.getData()));
 		//String x = new String(request.getData()).trim();
@@ -73,7 +73,7 @@ public class NamenodeServer {
 			String url = new String (request.getData());
 			byte[] buffer = baseURI.toString().getBytes() ;
 			
-			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, group, 9000);
+			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 			System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 			socket.send(reply);
 

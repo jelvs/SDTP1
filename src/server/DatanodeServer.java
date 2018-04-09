@@ -45,7 +45,7 @@ public class DatanodeServer {
 				String requested = new String(request.getData());
 				if(requested.equals("Datanode")) {
 				System.out.println(requested);
-				processMessage(socket, request, group);
+				processMessage(socket, request);
 				}
 
 			}    
@@ -58,7 +58,7 @@ public class DatanodeServer {
 	
 
 
-	private static void processMessage(MulticastSocket socket, DatagramPacket request, InetAddress group) throws IOException {
+	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
 		//System.out.println("processMessage");
 		System.out.println(new String(request.getData()));
 		//System.out.println("x : " + new String(request.getData()));
@@ -67,7 +67,7 @@ public class DatanodeServer {
 		String url = new String (request.getData());
 		byte[] buffer = baseURI.toString().getBytes() ;
 
-		DatagramPacket reply = new DatagramPacket(buffer, buffer.length, group, 9000);
+		DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 		System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 		socket.send(reply);
 
