@@ -16,11 +16,12 @@ public class NamenodeServer {
 
 	private static URI baseURI;
 	
-
+		static String badjoraz;
 	public static void main(String[] args) throws Exception {
 
 
 		//create Server
+		badjoraz = "http://"+ InetAddress.getLocalHost().getHostAddress() + ":8081/";
 		baseURI = URI.create(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8081/"));
 		System.out.println(baseURI );
 		ResourceConfig config = new ResourceConfig();
@@ -46,12 +47,12 @@ public class NamenodeServer {
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 				socket.receive( request );
-				String requested = new String(request.getData());
+				String requested = new String(request.getData(), 0,request.getLength());
 				System.out.println("fuck yeah : " + new String(request.getData()));
-				//System.out.write( request.getData(), 0, request.getLength() ) ;
+				//System.out.write( request.getData), 0, request.getLength() ) ;
 				//prepare and send reply... (unicast)
-				if(requested.equals("Namenode")) {
-					System.out.println(requested);
+				if(requested.contains("Namenode")) {
+					System.out.println(requested + "passou");
 				processMessage(socket, request);
 				}
 
@@ -71,8 +72,9 @@ public class NamenodeServer {
 		//String x = new String(request.getData()).trim();
 		//if(x.equals("BlobStorage")) {
 			String url = new String (request.getData());
-			byte[] buffer = baseURI.toString().getBytes() ;
-			
+			System.out.println(badjoraz);
+			//byte[] buffer = baseURI.toString().getBytes() ;
+			byte[] buffer = badjoraz.getBytes();
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 			System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 			socket.send(reply);
