@@ -15,6 +15,7 @@ public class NamenodeServer {
 
 
 	private static URI baseURI;
+	
 
 	public static void main(String[] args) throws Exception {
 
@@ -29,7 +30,7 @@ public class NamenodeServer {
 
 		System.err.println("Server ready....");
 
-
+		
 		try {
 			final int MAX_DATAGRAM_SIZE = 65536;
 			final InetAddress group = InetAddress.getByName("238.69.69.69");
@@ -45,10 +46,14 @@ public class NamenodeServer {
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 				socket.receive( request );
+				String requested = new String(request.getData());
 				System.out.println("fuck yeah : " + new String(request.getData()));
 				//System.out.write( request.getData(), 0, request.getLength() ) ;
 				//prepare and send reply... (unicast)
-				processMessage(socket, request);
+				if(requested.equals("Namenode")) {
+					System.out.println(requested);
+				processMessage(socket, request, group);
+				}
 
 			}    
 		} catch (IOException e) {
@@ -60,20 +65,16 @@ public class NamenodeServer {
 	}
 
 
-	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
+	private static void processMessage(MulticastSocket socket, DatagramPacket request, InetAddress group) throws IOException {
 		//System.out.println("processMessage");
 		//System.out.println("x : " + new String(request.getData()));
 		//String x = new String(request.getData()).trim();
 		//if(x.equals("BlobStorage")) {
 			String url = new String (request.getData());
-			byte[] buffer = "Namenode".getBytes() ;
-
-			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+			byte[] buffer = baseURI.toString().getBytes() ;
+			
+			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, group, 9000);
 			System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
-
-			reply.setAddress(request.getAddress());
-			reply.setPort(request.getPort());
-
 			socket.send(reply);
 
 
