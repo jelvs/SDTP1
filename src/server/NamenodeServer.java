@@ -46,6 +46,7 @@ public class NamenodeServer {
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 				socket.receive( request );
+				
 				String requested = new String(request.getData(), 0, request.getLength());
 				System.out.println("fuck yeah : " + new String(request.getData()));
 				//System.out.write( request.getData(), 0, request.getLength() ) ;
@@ -66,13 +67,9 @@ public class NamenodeServer {
 
 
 	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
-		//System.out.println("processMessage");
-		//System.out.println("x : " + new String(request.getData()));
-		//String x = new String(request.getData()).trim();
-		//if(x.equals("BlobStorage")) {
-			//String url = new String (request.getData());
+		
 			byte[] buffer = baseURI.toString().getBytes() ;
-			
+			System.out.println("ola: " + buffer.toString().getBytes());
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 			System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 			socket.send(reply);

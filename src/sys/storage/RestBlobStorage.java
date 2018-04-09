@@ -144,7 +144,7 @@ public class RestBlobStorage implements BlobStorage {
 
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
-				socket.setSoTimeout(SOCKET_TIMEOUT);
+				//socket.setSoTimeout(SOCKET_TIMEOUT);
 				String message;
 				if(namenode == null) {
 					message = NAMENODE_MESSAGE;
@@ -153,9 +153,9 @@ public class RestBlobStorage implements BlobStorage {
 					message = DATANODE_MESSAGE;
 				}
 				multicastMessage(socket, message);
-
+				System.out.println("badjoraz");
 				socket.receive( request );
-
+				System.out.println(new String(request.getData(), 0, request.getLength()));
 				DiscoverData(request, message);
 
 				System.out.write( request.getData(), 0, request.getLength() ) ;
@@ -176,12 +176,12 @@ public class RestBlobStorage implements BlobStorage {
 
 					byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 					DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
-					socket.setSoTimeout(SOCKET_TIMEOUT);
+					//socket.setSoTimeout(SOCKET_TIMEOUT);
 
 					multicastMessage(socket, DATANODE_MESSAGE);
-
+					
 					socket.receive( request );
-
+					
 					DiscoverData(request, DATANODE_MESSAGE );
 
 					System.out.write( request.getData(), 0, request.getLength() ) ;
@@ -212,7 +212,7 @@ public class RestBlobStorage implements BlobStorage {
 	private void DiscoverData(DatagramPacket request, String localMessage) {
 		//System.out.println("before if : " + request.getAddress());
 		System.out.println("Message : " + new String(request.getData()));
-		String message = new String(request.getData());
+		String message = new String(request.getData(), 0 , request.getLength());
 
 		if(localMessage.equals(DATANODE_MESSAGE)){
 			String url = String.format(message);
@@ -246,12 +246,10 @@ public class RestBlobStorage implements BlobStorage {
 		try {
 			byte[] input = sendmessage.getBytes();
 			DatagramPacket reply = new DatagramPacket(input, input.length);
-
 			//set reply packet destination
-			final InetAddress mAddress = InetAddress.getByName(MULTICAST_ADDRESS);
+			InetAddress mAddress = InetAddress.getByName(MULTICAST_ADDRESS);
 			reply.setAddress(mAddress);
 			reply.setPort(MULTICAST_PORT);
-
 			socket.send(reply);
 		} catch (IOException ex) {
 			System.err.println("Error processing message from client. No reply was sent");
