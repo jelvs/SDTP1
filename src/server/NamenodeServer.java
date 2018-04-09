@@ -46,7 +46,7 @@ public class NamenodeServer {
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 				socket.receive( request );
-				String requested = new String(request.getData());
+				String requested = new String(request.getData(), 0, request.getLength());
 				System.out.println("fuck yeah : " + new String(request.getData()));
 				//System.out.write( request.getData(), 0, request.getLength() ) ;
 				//prepare and send reply... (unicast)
@@ -70,7 +70,7 @@ public class NamenodeServer {
 		//System.out.println("x : " + new String(request.getData()));
 		//String x = new String(request.getData()).trim();
 		//if(x.equals("BlobStorage")) {
-			String url = new String (request.getData());
+			//String url = new String (request.getData());
 			byte[] buffer = baseURI.toString().getBytes() ;
 			
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());

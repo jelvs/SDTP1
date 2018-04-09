@@ -24,11 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class RestBlobStorage implements BlobStorage {
 	private static final int BLOCK_SIZE = 512;
-	private static URI baseURI ;
 	private static final int SOCKET_TIMEOUT = 10000;
 	private static final int MAX_DATAGRAM_SIZE = 65536;
 	private static final String HEARTBEAT_MESSAGE = "ImAlive....";
-	private static final String MULTICAST_MESSAGE = "BlobStorage";
 	private static final String NAMENODE_MESSAGE = "Namenode";
 	private static final String DATANODE_MESSAGE = "Datanode";
 	private static final String MULTICAST_ADDRESS = "238.69.69.69";
@@ -66,6 +64,7 @@ public class RestBlobStorage implements BlobStorage {
 		Response response = target.path("/namenode/list/").queryParam("prefix", prefix).request().get();
 
 		if (response.hasEntity()) {
+			@SuppressWarnings("unchecked")
 			List<String> data = response.readEntity(List.class);
 			return data;
 		} else
@@ -211,7 +210,7 @@ public class RestBlobStorage implements BlobStorage {
 	 * Filters the messages from Datanode & Namenode
 	 */
 	private void DiscoverData(DatagramPacket request, String localMessage) {
-		System.out.println("before if : " + request.getAddress());
+		//System.out.println("before if : " + request.getAddress());
 		System.out.println("Message : " + new String(request.getData()));
 		String message = new String(request.getData());
 
@@ -237,8 +236,6 @@ public class RestBlobStorage implements BlobStorage {
 			String url = String.format(message);
 			System.out.println("url : " + url);
 			addNameNodeServer(url);
-		}else {
-			System.out.println("inside else....\n");
 		}
 	}
 
@@ -247,7 +244,6 @@ public class RestBlobStorage implements BlobStorage {
 	private static void multicastMessage(MulticastSocket socket, String sendmessage) throws IOException {
 		
 		try {
-
 			byte[] input = sendmessage.getBytes();
 			DatagramPacket reply = new DatagramPacket(input, input.length);
 

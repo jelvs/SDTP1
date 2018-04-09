@@ -42,7 +42,7 @@ public class DatanodeServer {
 				socket.receive( request );
 				//System.out.write( request.getData(), 0, request.getLength() ) ;
 				//prepare and send reply... (unicast)
-				String requested = new String(request.getData());
+				String requested = new String(request.getData(), 0, request.getLength());
 				if(requested.equals("Datanode")) {
 				System.out.println(requested);
 				processMessage(socket, request);
@@ -59,25 +59,14 @@ public class DatanodeServer {
 
 
 	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
-		//System.out.println("processMessage");
+		
 		System.out.println(new String(request.getData()));
-		//System.out.println("x : " + new String(request.getData()));
-		//String x = new String(request.getData()).trim();
-		//if(x.equals("BlobStorage")) {
-		String url = new String (request.getData());
+		
 		byte[] buffer = baseURI.toString().getBytes() ;
 
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
-		System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
+		System.out.println("Datanode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 		socket.send(reply);
-
-
-		//DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-		//System.out.println("Datanode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
-		//reply.setAddress(request.getAddress());
-		//reply.setPort(request.getPort());
-		//socket.send(reply);
-		//}
 
 
 
