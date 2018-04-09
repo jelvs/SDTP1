@@ -41,7 +41,7 @@ public class RestBlobStorage implements BlobStorage {
 	ConcurrentHashMap<String, String> datanodesMap;
 
 	public RestBlobStorage() {
-		this.namenode = null;
+		this.namenode = namenode;
 		this.datanodes = new ArrayList<String>();
 		this.datanodesMap = new ConcurrentHashMap<>();
 		runMulticast();
@@ -162,7 +162,7 @@ public class RestBlobStorage implements BlobStorage {
 				System.out.write( request.getData(), 0, request.getLength() ) ;
 				//prepare and send reply... (unicast)	
 
-				System.out.println("exit while\n");
+				
 			} catch (SocketTimeoutException e) {
 				System.out.println("Socket timeout!!!!!!");
 			} catch (IOException ex) {
@@ -170,6 +170,7 @@ public class RestBlobStorage implements BlobStorage {
 				ex.printStackTrace();
 			}
 		}
+		System.out.println("exit while\n");
 	
 		new Thread(() -> {
 			while(true) {
@@ -187,16 +188,20 @@ public class RestBlobStorage implements BlobStorage {
 
 					System.out.write( request.getData(), 0, request.getLength() ) ;
 					//prepare and send reply... (unicast)	
+					
+					Thread.sleep(10000);
 
 
 
-
-					System.out.println("exit while\n");
+					
 				} catch (SocketTimeoutException e) {
 					System.out.println("Socket timeout!!!!!!");
 				} catch (IOException ex) {
 					//IO error
 					ex.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			
@@ -211,8 +216,8 @@ public class RestBlobStorage implements BlobStorage {
 	 * Filters the messages from Datanode & Namenode
 	 */
 	private void DiscoverData(DatagramPacket request, String localMessage) {
-		System.out.println("before if : " + request.getAddress());
-		System.out.println("Message : " + new String(request.getData()));
+		//System.out.println("before if : " + request.getAddress());
+		//System.out.println("Message : " + new String(request.getData()));
 		String message = new String(request.getData());
 
 		if(localMessage.equals(DATANODE_MESSAGE)){

@@ -11,6 +11,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.URI;
 
+import javax.ws.rs.ProcessingException;
+
 public class NamenodeServer {
 
 
@@ -30,7 +32,10 @@ public class NamenodeServer {
 		JdkHttpServerFactory.createHttpServer(baseURI, config);
 
 		System.err.println("Server ready....");
-
+		
+		final int NUM_TRIES = 5, SLEEP_TIME = 10000;
+		
+		for (int i = 0; i < NUM_TRIES; i++) {
 		
 		try {
 			final int MAX_DATAGRAM_SIZE = 65536;
@@ -60,6 +65,9 @@ public class NamenodeServer {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch(ProcessingException pe) {
+			Thread.sleep(SLEEP_TIME);
+		}
 		}
 
 
@@ -67,15 +75,9 @@ public class NamenodeServer {
 
 
 	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
-		//System.out.println("processMessage");
-		//System.out.println("x : " + new String(request.getData()));
-		//String x = new String(request.getData()).trim();
-		//if(x.equals("BlobStorage")) {
-			String url = new String (request.getData());
-			//System.out.println(badjoraz);
+	
 			System.out.println(baseURI.toString());
 			byte[] buffer = baseURI.toString().getBytes() ;
-			//byte[] buffer = badjoraz.getBytes();
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 			System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 			socket.send(reply);
