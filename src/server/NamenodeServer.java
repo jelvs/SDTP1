@@ -72,9 +72,10 @@ public class NamenodeServer {
 		//String x = new String(request.getData()).trim();
 		//if(x.equals("BlobStorage")) {
 			String url = new String (request.getData());
-			System.out.println(badjoraz);
-			//byte[] buffer = baseURI.toString().getBytes() ;
-			byte[] buffer = badjoraz.getBytes();
+			//System.out.println(badjoraz);
+			System.out.println(baseURI.toString());
+			byte[] buffer = baseURI.toString().getBytes() ;
+			//byte[] buffer = badjoraz.getBytes();
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 			System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 			socket.send(reply);
