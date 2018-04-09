@@ -29,17 +29,20 @@ public class DatanodeResources implements Datanode {
 	private File yourFile;
 
 	public DatanodeResources() throws IOException {
-		yourFile = new File(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8080/"));
-		yourFile.createNewFile(); // if file already exists will do nothing
+		//yourFile = new File(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8080/"));
+		//yourFile.createNewFile(); // if file already exists will do nothing
 	}
 
-	public void writetoFile(byte[] data) {
+	public void writetoFile(String id, byte[] data) {
 
-		BufferedWriter writer = null;
+		
+		
+		
+		/*BufferedWriter writer = null;
 		try {
 			//create a temporary file
 			writer = new BufferedWriter(new FileWriter(yourFile, true));
-			writer.write(data.toString());
+			writer.write(iddata.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -49,7 +52,7 @@ public class DatanodeResources implements Datanode {
 				writer.close();
 			} catch (Exception e) {
 			}
-		}
+		}*/
 
 	}
 
@@ -69,7 +72,6 @@ public class DatanodeResources implements Datanode {
 	public byte[] readBlock(String block) {
 		byte[] data =  blocks.get(block);
 		if( data != null ) {
-			writetoFile(data);
 			return data;
 			
 		}else

@@ -3,116 +3,84 @@ package server;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import server.DatanodeServer.HeartBeat;
-import sys.storage.DatanodeResources;
 import sys.storage.NamenodeResources;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.SocketTimeoutException;
 import java.net.URI;
 
 public class NamenodeServer {
 
 
 	private static URI baseURI;
-	private static final String HEARTBEAT_MESSAGE = "ImAlive....";
-	private static final int SOCKET_TIMEOUT = 1000;
-	private static final int MAX_DATAGRAM_SIZE = 65536;
-	private static final String MULTICAST_MESSAGE = "Namenode";
 
-    private static final String MULTICAST_ADDRESS = "226.226.226.226";
-	private static final int MULTICAST_PORT = 9000;
-
-    public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 
 
-        //create Server
-        String baseURI = String.format("http://"+ InetAddress.getLocalHost().getHostAddress() +":8081/");
-        System.out.println(baseURI );
-        ResourceConfig config = new ResourceConfig();
-        config.register( new NamenodeResources() );
+		//create Server
+		baseURI = URI.create(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8081/"));
+		System.out.println(baseURI );
+		ResourceConfig config = new ResourceConfig();
+		config.register( new NamenodeResources() );
 
-        JdkHttpServerFactory.createHttpServer( URI.create(baseURI), config);
+		JdkHttpServerFactory.createHttpServer(baseURI, config);
 
-        System.err.println("Server ready....");
-
-      //multicast request sent up to 5 times
-      		for (int retry = 0; retry < 5; retry++) {
-      			try( MulticastSocket socket = new MulticastSocket()) {
-      				
-      					byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
-      					DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
-      					socket.setSoTimeout(SOCKET_TIMEOUT);
-      					
-      					multicastMessage(socket, MULTICAST_MESSAGE);
-      					
-      					
-      					socket.receive( request );
-      					System.out.write( request.getData(), 0, request.getLength() ) ;
-      					break;
-      					//prepare and send reply... (unicast)		
-      				
-      				
-      			} catch (SocketTimeoutException e) {
-      				System.out.println("Socket timeout!!!!!!");
-      			} catch (IOException ex) {
-      				//IO error
-      			}
-      		}
-      		new Thread(new HeartBeat()).start();
-
-      	}
+		System.err.println("Server ready....");
 
 
+		try {
+			final int MAX_DATAGRAM_SIZE = 65536;
+			final InetAddress group = InetAddress.getByName("238.69.69.69");
+			if( ! group.isMulticastAddress()) {
+				System.out.println( "Not a multicast address (use range : 224.0.0.0 -- 239.255.255.255)");
+				System.exit(1);
+			}
 
-      	private static void multicastMessage(MulticastSocket socket, String message ) throws IOException {
-      		try {
-      			
-      			final InetAddress mAddress = InetAddress.getByName(MULTICAST_ADDRESS);
-      			if (!mAddress.isMulticastAddress()) {
-      				System.out.println("Use range : 224.0.0.0 -- 239.255.255.255");
-      			}
-      			
-      			byte[] input = baseURI.toString().getBytes();
-      			DatagramPacket reply = new DatagramPacket(input, input.length);
+			MulticastSocket socket = new MulticastSocket( 9000 );
+			//System.out.println(group);
+			socket.joinGroup(group);
+			while( true ) {
+				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
+				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
+				socket.receive( request );
+				System.out.println("fuck yeah : " + new String(request.getData()));
+				//System.out.write( request.getData(), 0, request.getLength() ) ;
+				//prepare and send reply... (unicast)
+				processMessage(socket, request);
 
-      			//set reply packet destination
-      			reply.setAddress(mAddress);
-      			reply.setPort(MULTICAST_PORT);
-      			
-      			socket.send(reply);
-      		} catch (IOException ex) {
-      			System.err.println("Error processing message from client. No reply was sent");
-      		}
-      	}
-
-      	/**
-      	 * Thread class that handles the heartbeat system
-      	 */
-      	static class HeartBeat implements Runnable {
-
-      		public void run() {
-      			while (true) {
-
-      				try {
-      					MulticastSocket socket = new MulticastSocket();
+			}    
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 
-      					//Identifiyng the sender of the message
-      					String message = HEARTBEAT_MESSAGE + "/" + InetAddress.getByName(MULTICAST_ADDRESS);
+	}
 
-      					multicastMessage(socket, message);
 
-      					Thread.sleep(3000);
+	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
+		//System.out.println("processMessage");
+		//System.out.println("x : " + new String(request.getData()));
+		//String x = new String(request.getData()).trim();
+		//if(x.equals("BlobStorage")) {
+			String url = new String (request.getData());
+			byte[] buffer = "Namenode".getBytes() ;
 
-      				} catch (IOException | InterruptedException ex) {
-      					//Some error occured
-      				}
-      			}
-      		}
-      	}
-      	
+			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+			System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
+
+			reply.setAddress(request.getAddress());
+			reply.setPort(request.getPort());
+
+			socket.send(reply);
+
+
+
+
+		//}
+	}
+
+
 }
