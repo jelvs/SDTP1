@@ -17,6 +17,8 @@ public class LocalBlobStorageTest {
 		 */
 		public static void main(String[] args) throws Exception {
 
+			System.setProperty("java.net.preferIPv4Stack", "true");
+			
 			System.out.println("\n teste1 \n");
 			//1. Get an implementation of the storage. LocalBlobStorage implements everything locally, in memory, sadly...
 			BlobStorage storage = new RestBlobStorage();

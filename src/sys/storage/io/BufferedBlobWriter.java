@@ -1,115 +1,65 @@
 package sys.storage.io;
 
 import java.io.ByteArrayOutputStream;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import api.storage.BlobStorage.BlobWriter;
+import client.DatanodeClient;
 import api.storage.Datanode;
 import api.storage.Namenode;
-import org.glassfish.jersey.client.ClientConfig;
 import utils.IO;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
 /*
- *
+ * 
  * Implements a ***centralized*** BlobWriter.
- *
+ * 
  * Accumulates lines in a list of blocks, avoids splitting a line across blocks.
  * When the BlobWriter is closed, the Blob (and its blocks) is published in the Namenode.
- *
+ * 
  */
 public class BufferedBlobWriter implements BlobWriter {
-    final String name;
-    final int blockSize;
-    final ByteArrayOutputStream buf;
+	final String name;
+	final int blockSize;
+	final ByteArrayOutputStream buf;
 
-    final String namenode;
-    final List<String> datanodes;
-    final List<String> blocks = new LinkedList<>();
+	final Namenode namenode; 
+	final ConcurrentHashMap<String, DatanodeClient> datanodes;
+	final List<String> blocks = new LinkedList<>();
 
-    public BufferedBlobWriter(String name, String namenode, ArrayList<String> datanodes, int blockSize) {
-        this.name = name;
+	public BufferedBlobWriter(String name, Namenode namenode, ConcurrentHashMap<String, DatanodeClient> datanodes, int blockSize ) {
+		this.name = name;
+		this.namenode = namenode;
+		this.datanodes = datanodes;
 
-        //HARDCoded para testar e ver se está a funcionar
+		this.blockSize = blockSize;
+		this.buf = new ByteArrayOutputStream( blockSize );
+	}
 
-        this.namenode = namenode;
-        this.datanodes = datanodes;
+	private void flush( byte[] data, boolean eob ) {
+		for (Entry<String, DatanodeClient> url : datanodes.entrySet()) {
+			blocks.add(datanodes.get(url.getKey()).createBlock(data)  );
+			if( eob ) {
+				namenode.create(name, blocks);
+				blocks.clear();
+			}
+		}
+	}
 
-        this.blockSize = blockSize;
-        this.buf = new ByteArrayOutputStream(blockSize);
-    }
+	@Override
+	public void writeLine(String line) {
+		if( buf.size() + line.length() > blockSize - 1 ) {
+			this.flush(buf.toByteArray(), false);
+			buf.reset();
+		}
+		IO.write( buf, line.getBytes() );
+		IO.write( buf, '\n');
+	}
 
-    private void flush(byte[] data, boolean eob) {
-
-        ClientConfig config = new ClientConfig();
-        Client client = ClientBuilder.newClient(config);
-
-        URI baseURI = UriBuilder.fromUri(datanodes.get(0)).build();
-        WebTarget target = client.target(baseURI);
-
-        Response response = target.path("/datanode/")
-                .request()
-                .post(Entity.entity(new byte[1024], MediaType.APPLICATION_OCTET_STREAM));
-
-        if (response.hasEntity()) {
-            String id = response.readEntity(String.class);
-            System.out.println("data resource id: " + id);
-            blocks.add(id);
-        } else
-            System.err.println(response.getStatus());
-
-
-        if (eob) {
-
-            ClientConfig config2 = new ClientConfig();
-            Client client2 = ClientBuilder.newClient(config2);
-
-            URI baseURI2 = UriBuilder.fromUri(namenode).build();
-            WebTarget target2 = client2.target(baseURI2);
-
-            Response response2 = target2.path("/namenode/" + name)
-                    .request()
-                    .post(Entity.entity(blocks, MediaType.APPLICATION_JSON_TYPE));
-
-            if (response2.hasEntity()) {
-                String id = response2.readEntity(String.class);
-                System.out.println("data resource id: " + id);
-            } else
-                System.err.println(response2.getStatus());
-
-
-            blocks.clear();
-        }
-
-		/*blocks.add( datanodes[0].createBlock(data)  );
-		if( eob ) {
-			namenode.create(name, blocks);
-			blocks.clear();
-		}*/
-    }
-
-    @Override
-    public void writeLine(String line) {
-        if (buf.size() + line.length() > blockSize - 1) {
-            this.flush(buf.toByteArray(), false);
-            buf.reset();
-        }
-        IO.write(buf, line.getBytes());
-        IO.write(buf, '\n');
-    }
-
-    @Override
-    public void close() {
-        flush(buf.toByteArray(), true);
-    }
+	@Override
+	public void close() {
+		flush( buf.toByteArray(), true );
+	}
 }

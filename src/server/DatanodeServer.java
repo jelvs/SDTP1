@@ -12,11 +12,11 @@ import javax.ws.rs.ProcessingException;
 
 public class DatanodeServer {
 
-	private static URI baseURI;
+	public static URI baseURI;
 
 
 	public static void main(String[] args) throws Exception {
-		//System.setProperty("java.net.preferIPv4Stack", "true");
+		System.setProperty("java.net.preferIPv4Stack", "true");
 
 		//create Server
 		baseURI = URI.create(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8080/"));
@@ -54,15 +54,14 @@ public class DatanodeServer {
 						System.out.println(requested + "passou");
 						processMessage(socket, request);
 						counter++;
+						Thread.sleep(10000);
 					}
 				}
 				   
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} /* catch(ProcessingException pe) {
-				Thread.sleep(SLEEP_TIME);
-			}*/
+			} 
 		
 	}
 

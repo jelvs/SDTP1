@@ -20,7 +20,7 @@ public class NamenodeServer {
 	
 		static String badjoraz;
 	public static void main(String[] args) throws Exception {
-
+		System.setProperty("java.net.preferIPv4Stack", "true");
 
 		//create Server
 		badjoraz = "http://"+ InetAddress.getLocalHost().getHostAddress() + ":8081/";
