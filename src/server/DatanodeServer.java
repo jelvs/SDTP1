@@ -16,7 +16,7 @@ public class DatanodeServer {
 
 
 	public static void main(String[] args) throws Exception {
-
+		//System.setProperty("java.net.preferIPv4Stack", "true");
 
 		//create Server
 		baseURI = URI.create(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8080/"));
@@ -28,9 +28,9 @@ public class DatanodeServer {
 
 		System.err.println("Server ready....");
 
-		final int NUM_TRIES = 5, SLEEP_TIME = 10000;
+		//final int NUM_TRIES = 5, SLEEP_TIME = 1000;
 		
-		for (int i = 0; i < NUM_TRIES; i++) {
+		//for (int i = 0; i < NUM_TRIES; i++) {
 			try {
 				final int MAX_DATAGRAM_SIZE = 65536;
 				final InetAddress group = InetAddress.getByName("238.69.69.69");
@@ -41,7 +41,8 @@ public class DatanodeServer {
 
 				MulticastSocket socket = new MulticastSocket( 9000 );
 				socket.joinGroup(group);
-				
+				int counter = 0;
+				while(counter == 0) {	
 					byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 					DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 					socket.receive( request );
@@ -52,16 +53,17 @@ public class DatanodeServer {
 					if(requested.contains("Datanode")) {
 						System.out.println(requested + "passou");
 						processMessage(socket, request);
+						counter++;
 					}
-
+				}
 				   
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch(ProcessingException pe) {
+			} /* catch(ProcessingException pe) {
 				Thread.sleep(SLEEP_TIME);
-			}
-		}
+			}*/
+		
 	}
 
 

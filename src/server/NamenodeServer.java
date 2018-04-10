@@ -33,10 +33,6 @@ public class NamenodeServer {
 
 		System.err.println("Server ready....");
 		
-		final int NUM_TRIES = 5, SLEEP_TIME = 10000;
-		
-		for (int i = 0; i < NUM_TRIES; i++) {
-		
 		try {
 			final int MAX_DATAGRAM_SIZE = 65536;
 			final InetAddress group = InetAddress.getByName("238.69.69.69");
@@ -48,7 +44,8 @@ public class NamenodeServer {
 			MulticastSocket socket = new MulticastSocket( 9000 );
 			//System.out.println(group);
 			socket.joinGroup(group);
-			while( true ) {
+			int counter = 0;
+			while(counter == 0) {
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 				socket.receive( request );
@@ -58,17 +55,16 @@ public class NamenodeServer {
 				//prepare and send reply... (unicast)
 				if(requested.contains("Namenode")) {
 					System.out.println(requested + "passou");
-				processMessage(socket, request);
+					processMessage(socket, request);
+					counter++;
 				}
 
 			}    
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch(ProcessingException pe) {
-			Thread.sleep(SLEEP_TIME);
-		}
-		}
+		} 
+		
 
 
 	}

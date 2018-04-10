@@ -42,8 +42,8 @@ public class BufferedBlobWriter implements BlobWriter {
 
         //HARDCoded para testar e ver se está a funcionar
 
-        this.namenode = "http://localhost:9091";
-        this.datanodes = new ArrayList<String>();
+        this.namenode = namenode;
+        this.datanodes = datanodes;
 
         this.blockSize = blockSize;
         this.buf = new ByteArrayOutputStream(blockSize);

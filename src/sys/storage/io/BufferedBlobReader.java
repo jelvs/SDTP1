@@ -43,8 +43,8 @@ public class BufferedBlobReader implements BlobReader {
 
         //HARDCoded para testar e ver se está a funcionar
 
-        this.namenode = "http://localhost:9091";
-        this.datanode = "http://localhost:9999";
+        this.namenode = namenode;
+        this.datanode = datanode;
 
         ClientConfig config = new ClientConfig();
         Client client = ClientBuilder.newClient(config);

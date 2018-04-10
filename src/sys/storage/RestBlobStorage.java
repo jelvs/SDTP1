@@ -49,6 +49,7 @@ public class RestBlobStorage implements BlobStorage {
 
 	public void addDataNodeServer(String datanode) {
 		datanodes.add(datanode);
+		datanodesMap.putIfAbsent(datanode, datanode);
 	}
 
 	public void addNameNodeServer(String namenode) {
@@ -139,13 +140,14 @@ public class RestBlobStorage implements BlobStorage {
 		return new BufferedBlobWriter(name, namenode, datanodes, BLOCK_SIZE);
 	}
 	private void runMulticast() {
-		while(datanodes.size() == 0 || namenode == null) {
+		
+		while(datanodes.size() == 0 && namenode == null) {
 			try( MulticastSocket socket = new MulticastSocket(9000)) {
 
 
 				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
-				socket.setSoTimeout(SOCKET_TIMEOUT);
+				//socket.setSoTimeout(SOCKET_TIMEOUT);
 				String message;
 				if(namenode == null) {
 					message = NAMENODE_MESSAGE;
@@ -189,7 +191,7 @@ public class RestBlobStorage implements BlobStorage {
 					System.out.write( request.getData(), 0, request.getLength() ) ;
 					//prepare and send reply... (unicast)	
 					
-					Thread.sleep(10000);
+					//Thread.sleep(10000);
 
 
 
@@ -199,9 +201,6 @@ public class RestBlobStorage implements BlobStorage {
 				} catch (IOException ex) {
 					//IO error
 					ex.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 			
