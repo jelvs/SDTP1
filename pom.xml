@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>SD2018-T1</groupId>
 	<artifactId>SD2018-T1</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -48,27 +48,19 @@
 							<goal>build</goal>
 						</goals>
 						<configuration>
-							<imageName>smduarte/sd17-t2-base</imageName>
-							<baseImage>openjdk:8</baseImage>
+							<imageName>sd18-tp1-base-43364-42526</imageName>
+							<baseImage>smduarte/sd18-tp1-openjdk8:latest</baseImage>
 							<entryPoint>[]</entryPoint>
 							<resources>
 								<resource>
 									<targetPath>/props</targetPath>
 									<directory>${basedir}</directory>
-									<include>sd2017-t2.props</include>
+									<include>sd2018-tp1.props</include>
 								</resource>
 								<resource>
 									<targetPath>/home/sd</targetPath>
 									<directory>${project.build.directory}/lib</directory>
 									<include>*.jar</include>
-								</resource>
-								<resource>
-									<targetPath>/home/sd/</targetPath>
-									<directory>${basedir}/tls</directory>
-									<include>rendezvous.jks</include>
-									<include>indexer.jks</include>
-									<include>indexer-ts.jks</include>
-									<include>tester.jks</include>
 								</resource>
 							</resources>
 						</configuration>
@@ -80,8 +72,8 @@
 							<goal>build</goal>
 						</goals>
 						<configuration>
-							<imageName>smduarte/sd17-t2-${user.name}</imageName>
-							<baseImage>smduarte/sd17-t2-base</baseImage>
+							<imageName>sd18-tp1-43364-42526</imageName>
+							<baseImage>sd18-tp1-base-43364-42526</baseImage>
 							<resources>
 								<resource>
 									<targetPath>/home/sd</targetPath>
@@ -91,7 +83,6 @@
 							</resources>
 						</configuration>
 					</execution>
-
 				</executions>
 			</plugin>
 		</plugins>

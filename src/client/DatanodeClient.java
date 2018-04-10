@@ -30,18 +30,17 @@ public class DatanodeClient implements Datanode {
 	
 	@Override
 	public String createBlock(byte[] data) {
-		
 		String id = null;
 		Response response2 = target.path("/datanode/")
 				.request()
-				.post(Entity.entity(data, MediaType.APPLICATION_JSON_TYPE));
+				.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
 		if (response2.hasEntity()) {
 			id = response2.readEntity(String.class);
 		} else
 			System.err.println(response2.getStatus());
-		
-		return id;
+		System.out.println(String.format("%s/datanode/%s", baseURI, id));
+		return String.format("%s/datanode/%s", baseURI, id);
 	}
 
 	@Override

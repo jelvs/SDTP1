@@ -20,9 +20,9 @@ public class DatanodeServer {
 
 		//create Server
 		baseURI = URI.create(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8080/"));
-		System.out.println(baseURI);
+		System.out.println(baseURI + ": ola");
 		ResourceConfig config = new ResourceConfig();
-		config.register(new DatanodeResources());
+		config.register(new DatanodeResources(baseURI));
 
 		JdkHttpServerFactory.createHttpServer(baseURI, config);
 

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -32,13 +33,17 @@ public class DatanodeResources implements Datanode {
 	private static final int INITIAL_SIZE = 32;
 	private Map<String, byte[]> blocks = new HashMap<>(INITIAL_SIZE);
 	private File yourFile;
+	private URI baseURI;
 
 
-	public DatanodeResources() throws IOException {
-		//yourFile = new File("/Datanodes");
-		//if(!yourFile.exists()) {
-		//	yourFile.mkdir();
-		//}
+	public DatanodeResources(URI baseURI) throws IOException {
+		/*yourFile = new File("/Datanodes");
+		if(!yourFile.exists()) {
+			new yourFile("/Datanodes").mkdir();
+			
+		}*/
+		this.baseURI=baseURI;
+		
 	}
 
 	public void writetoFile(String id, byte[] data) {
@@ -72,7 +77,7 @@ public class DatanodeResources implements Datanode {
 			id = Random.key64();
 			writetoFile(id, data);
 		}*/
-		return id;
+		return baseURI + "/datanode/" + id;
 	}
 
 	@Override
@@ -88,8 +93,8 @@ public class DatanodeResources implements Datanode {
 			return data;
 		else
 			throw new RuntimeException("NOT FOUND");
-	
-		/*RandomAccessFile f;
+		}
+	/*RandomAccessFile f;
 		byte[] b;
 		
 		if(yourFile.exists()){
@@ -109,6 +114,6 @@ public class DatanodeResources implements Datanode {
 				}
 			}
 		}
-		return new byte[0];*/
-	}
+		return new byte[0];
+	}*/
 }

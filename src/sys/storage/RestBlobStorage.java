@@ -87,7 +87,7 @@ public class RestBlobStorage implements BlobStorage {
 
 private void runMulticast() {
 
-	while(datanodes.size() == 0 && namenode == null) {
+	while(datanodes.size() == 0 || namenode == null) {
 		try( MulticastSocket socket = new MulticastSocket(9000)) {
 
 
@@ -102,9 +102,9 @@ private void runMulticast() {
 				message = DATANODE_MESSAGE;
 			}
 			multicastMessage(socket, message);
-
+			System.out.println("ola");
 			socket.receive( request );
-
+			System.out.println("i'm out receive");
 			DiscoverData(request, message);
 
 			System.out.write( request.getData(), 0, request.getLength() ) ;
