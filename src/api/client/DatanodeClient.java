@@ -1,4 +1,4 @@
-package client;
+package api.client;
 
 import java.net.URI;
 import java.util.List;
@@ -12,27 +12,20 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.ClientProperties;
 
 import api.storage.Datanode;
 
 public class DatanodeClient implements Datanode {
 	
-	private ClientConfig config;
-	private Client client;
+	private ClientConfig config = new ClientConfig();
+	private Client client = ClientBuilder.newClient(config);
 	private URI baseURI;
 	private WebTarget target;
-	final int CONNECT_TIMEOUT = 2000;
-	final int READ_TIMEOUT = 2000;
 	
 	public DatanodeClient(String url) {
 		
 		baseURI = UriBuilder.fromUri(url).build();
-		config = new ClientConfig();
-		client = ClientBuilder.newClient(config);
 		target = client.target(baseURI);
-		config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
-		config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
 	}
 	
 	@Override
@@ -41,14 +34,14 @@ public class DatanodeClient implements Datanode {
 		String id = null;
 		Response response2 = target.path("/datanode/")
 				.request()
-				.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
+				.post(Entity.entity(data, MediaType.APPLICATION_JSON_TYPE));
 
 		if (response2.hasEntity()) {
 			id = response2.readEntity(String.class);
 		} else
 			System.err.println(response2.getStatus());
 		
-		return baseURI + "datanode/" + id;
+		return id;
 	}
 
 	@Override
@@ -60,7 +53,8 @@ public class DatanodeClient implements Datanode {
 		if (response3.getStatusInfo().equals(Response.Status.NO_CONTENT)) {
 			System.out.println("deleted block resource...");
 		} else
-			System.err.println(Response.Status.NO_CONTENT);
+			System.err.println(response3.getStatus());
+
 	}
 		
 

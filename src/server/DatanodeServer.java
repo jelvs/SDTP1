@@ -4,6 +4,7 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import sys.storage.DatanodeResources;
+import utils.IP;
 
 import java.io.IOException;
 import java.net.*;
@@ -19,8 +20,8 @@ public class DatanodeServer {
 		System.setProperty("java.net.preferIPv4Stack", "true");
 
 		//create Server
-		baseURI = URI.create(String.format("http://" + InetAddress.getLocalHost().getHostAddress() + ":8080/"));
-		System.out.println(baseURI + ": ola");
+		baseURI = URI.create(String.format("http://" + IP.hostAddress() + ":8080/"));
+		System.out.println(baseURI);
 		ResourceConfig config = new ResourceConfig();
 		config.register(new DatanodeResources(baseURI));
 
@@ -28,9 +29,9 @@ public class DatanodeServer {
 
 		System.err.println("Server ready....");
 
-		//final int NUM_TRIES = 5, SLEEP_TIME = 1000;
-		
-		//for (int i = 0; i < NUM_TRIES; i++) {
+		final int NUM_TRIES = 5;
+
+		for (int i = 0; i < NUM_TRIES; i++) {
 			try {
 				final int MAX_DATAGRAM_SIZE = 65536;
 				final InetAddress group = InetAddress.getByName("238.69.69.69");
@@ -57,12 +58,13 @@ public class DatanodeServer {
 						Thread.sleep(10000);
 					}
 				}
-				   
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
-		
+		}
+
 	}
 
 

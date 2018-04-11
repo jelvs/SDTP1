@@ -1,10 +1,13 @@
 package sys.storage.io;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import api.storage.BlobStorage.BlobReader;
 import api.storage.Datanode;
@@ -23,31 +26,31 @@ public class BufferedBlobReader implements BlobReader {
 
 	final String name;
 	final Namenode namenode; 
-	final DatanodeClient datanode;
-	
+	final ConcurrentHashMap<String, DatanodeClient> datanodes;
+
 	final Iterator<String> blocks;
 
 	final LazyBlockReader lazyBlockIterator;
-	
-	public BufferedBlobReader( String name, Namenode namenode, DatanodeClient datanode) {
+
+	public BufferedBlobReader( String name, Namenode namenode, ConcurrentHashMap<String, DatanodeClient> datanodes) {
 		this.name = name;
 		this.namenode = namenode;
-		this.datanode = datanode;
-		
+		this.datanodes = datanodes;
+
 		this.blocks = this.namenode.read( name ).iterator();
 		this.lazyBlockIterator = new LazyBlockReader();
 	}
-	
+
 	@Override
 	public String readLine() {
 		return lazyBlockIterator.hasNext() ? lazyBlockIterator.next() : null ;
 	}
-	
+
 	@Override
 	public Iterator<String> iterator() {
 		return lazyBlockIterator;
 	}
-	
+
 	private Iterator<String> nextBlockLines() {
 		if( blocks.hasNext() )
 			return fetchBlockLines( blocks.next() ).iterator();
@@ -56,18 +59,35 @@ public class BufferedBlobReader implements BlobReader {
 	} 
 
 	private List<String> fetchBlockLines(String block) {
-		byte[] data = datanode.readBlock( block );
+		byte[] data  = null;
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+		if(namenode.equals(name)) {
+			for(DatanodeClient x : datanodes.values()) {
+
+				data = x.readBlock( block );
+				try {
+					outputStream.write(data);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+
+			}data = outputStream.toByteArray( );}
+
 		return Arrays.asList( new String(data).split("\\R"));
+
+
 	}
-	
+
 	private class LazyBlockReader implements Iterator<String> {
-		
+
 		Iterator<String> lines;
-		
+
 		LazyBlockReader() {
 			this.lines = nextBlockLines();
 		}
-		
+
 		@Override
 		public String next() {
 			return lines.next();

@@ -1,4 +1,4 @@
-package client;
+package api.client;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -16,18 +16,15 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.collections4.Trie;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.ClientProperties;
 
 import api.storage.Namenode;
 
 public class NamenodeClient implements Namenode {
 
-	private ClientConfig config;
-	private Client client;
+	private ClientConfig config = new ClientConfig();
+	private Client client = ClientBuilder.newClient(config);
 	private URI baseURI;
 	private WebTarget target;
-	final int CONNECT_TIMEOUT = 2000;
-	final int READ_TIMEOUT = 2000;
 	
 	private static Logger logger = Logger.getLogger(NamenodeClient.class.toString() );
 	
@@ -35,18 +32,16 @@ public class NamenodeClient implements Namenode {
 	
 	public NamenodeClient(String url) {
 		
-		config = new ClientConfig();
-		client = ClientBuilder.newClient(config);
 		baseURI = UriBuilder.fromUri(url).build();
 		target = client.target(baseURI);
-		config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
-		config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
 	}
 	
 	@Override
 	public List<String> list(String prefix) {
 		
-		Response response = target.path("/namenode/list/").queryParam("prefix", prefix).request().get();
+		Response response = target.path("/namenode/list/").queryParam("prefix", prefix)
+				.request()
+				.get();
 
 		if (response.hasEntity()) {
 			List<String> data = response.readEntity(List.class);
@@ -60,6 +55,7 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void create(String name,  List<String> blocks) {
+		
 		Response response2 = target.path("/namenode/" + name)
 				.request()
 				.post(Entity.entity(blocks, MediaType.APPLICATION_JSON_TYPE));
@@ -75,7 +71,10 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void delete(String prefix) {
-		Response response3 = target.path("/namenode/list/").queryParam("prefix", prefix).request().delete();
+		
+		Response response3 = target.path("/namenode/list/").queryParam("prefix", prefix)
+				.request()
+				.delete();
 		if (response3.getStatusInfo().equals(Response.Status.NO_CONTENT)) {
 			System.out.println("deleted data resource...");
 		} else
@@ -85,7 +84,9 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void update(String name, List<String> blocks) {
-		Response response = target.path("/namenode/" + name).request().put(Entity.entity(name, MediaType.APPLICATION_JSON_TYPE));
+		Response response = target.path("/namenode/" + name)
+				.request()
+				.put(Entity.entity(name, MediaType.APPLICATION_JSON_TYPE));
 		if( names.putIfAbsent( name, new ArrayList<>(blocks)) == null ) {
 			logger.info("NOT FOUND");
 		}else
