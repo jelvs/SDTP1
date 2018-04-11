@@ -48,7 +48,8 @@ public class DatanodeClient implements Datanode {
 		} else
 			System.err.println(response2.getStatus());
 		
-		return baseURI + "datanode/" + id;
+		
+		return response2.getLocation() + "datanode/" + id;
 	}
 
 	@Override

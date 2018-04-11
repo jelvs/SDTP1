@@ -18,6 +18,7 @@ public class NamenodeServer {
 
 
 	private static URI baseURI;
+	private static final int NUM_TRIES = 5;
 
 	static String badjoraz;
 	public static void main(String[] args) throws Exception {
@@ -34,10 +35,8 @@ public class NamenodeServer {
 
 		System.err.println("Server ready....");
 
-		final int NUM_TRIES = 5;
 
-		for (int i = 0; i < NUM_TRIES; i++) {
-
+		for(int i = 0; i <NUM_TRIES; i++) {
 			try {
 				final int MAX_DATAGRAM_SIZE = 65536;
 				final InetAddress group = InetAddress.getByName("238.69.69.69");
@@ -45,49 +44,78 @@ public class NamenodeServer {
 					System.out.println( "Not a multicast address (use range : 224.0.0.0 -- 239.255.255.255)");
 					System.exit(1);
 				}
-
 				MulticastSocket socket = new MulticastSocket( 9000 );
-				//System.out.println(group);
 				socket.joinGroup(group);
 				int counter = 0;
-				while(counter == 0) {
+				while(counter ==0) {
 					byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 					DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 					socket.receive( request );
 					String requested = new String(request.getData(), 0,request.getLength());
-					System.out.println("fuck yeah : " + new String(request.getData()));
-					//System.out.write( request.getData), 0, request.getLength() ) ;
+
+					System.out.write(request.getData(), 0, request.getLength()) ;
 					//prepare and send reply... (unicast)
 					if(requested.contains("Namenode")) {
 						System.out.println(requested + "passou");
 						processMessage(socket, request);
-						counter++;
+						counter ++;
 					}
 
-				}    
+				}  
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
+		}new Thread(() -> {
+			HeartBeat();
+
+		}).start();
+
+	}
+
+	private static void HeartBeat() {
+		try {
+			final int MAX_DATAGRAM_SIZE = 65536;
+			final InetAddress group = InetAddress.getByName("238.69.69.69");
+			if( ! group.isMulticastAddress()) {
+				System.out.println( "Not a multicast address (use range : 224.0.0.0 -- 239.255.255.255)");
+				System.exit(1);
+			}
+			MulticastSocket socket = new MulticastSocket( 9000 );
+			socket.joinGroup(group);
+			byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
+			DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
+			socket.receive( request );
+			String requested = new String(request.getData(), 0,request.getLength());
+
+			System.out.write(request.getData(), 0, request.getLength()) ;
+
+			//prepare and send reply... (unicast)
+			if(requested.contains("Namenode")) {
+				processMessage(socket, request);
+			}  
+			Thread.sleep(1000);
+		}catch (IOException e) {
+			e.printStackTrace();
+		}catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-
-
 
 	}
 
 
-	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
 
-		System.out.println(baseURI.toString());
+	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
+		
 		byte[] buffer = baseURI.toString().getBytes() ;
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
-		System.out.println("Namenode: " + "Address: " + request.getAddress() + "Port: " + request.getPort());
 		socket.send(reply);
 
 
 
 
-		//}
+		
 	}
 
 

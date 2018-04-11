@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import api.storage.BlobStorage.BlobWriter;
 import client.DatanodeClient;
+import client.NamenodeClient;
 import api.storage.Datanode;
 import api.storage.Namenode;
 import utils.IO;
@@ -26,11 +27,11 @@ public class BufferedBlobWriter implements BlobWriter {
 	final int blockSize;
 	final ByteArrayOutputStream buf;
 
-	final Namenode namenode; 
+	NamenodeClient namenode; 
 	final ConcurrentHashMap<String, DatanodeClient> datanodes;
 	final List<String> blocks = new LinkedList<>();
 
-	public BufferedBlobWriter(String name, Namenode namenode, ConcurrentHashMap<String, DatanodeClient> datanodes, int blockSize ) {
+	public BufferedBlobWriter(String name, NamenodeClient namenode, ConcurrentHashMap<String, DatanodeClient> datanodes, int blockSize ) {
 		this.name = name;
 		this.namenode = namenode;
 		this.datanodes = datanodes;
@@ -41,7 +42,7 @@ public class BufferedBlobWriter implements BlobWriter {
 
 	private void flush( byte[] data, boolean eob ) {
 		for (Entry<String, DatanodeClient> url : datanodes.entrySet()) {
-			blocks.add(datanodes.get(url.getKey()).createBlock(data)  );
+			blocks.add(datanodes.get(url.getKey()).createBlock(data));
 			if( eob ) {
 				namenode.create(name, blocks);
 				blocks.clear();

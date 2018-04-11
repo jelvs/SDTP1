@@ -76,7 +76,7 @@ public class DatanodeResources implements Datanode {
 
 	}
 
-	@SuppressWarnings("resource")
+	
 	@Override
 	public synchronized byte[] readBlock(String block) {
 			try {

@@ -26,8 +26,8 @@ public class NamenodeClient implements Namenode {
 	private Client client;
 	private URI baseURI;
 	private WebTarget target;
-	final int CONNECT_TIMEOUT = 2000;
-	final int READ_TIMEOUT = 2000;
+	//final int CONNECT_TIMEOUT = 2000;
+	//final int READ_TIMEOUT = 2000;
 	
 	private static Logger logger = Logger.getLogger(NamenodeClient.class.toString() );
 	
@@ -39,15 +39,16 @@ public class NamenodeClient implements Namenode {
 		client = ClientBuilder.newClient(config);
 		baseURI = UriBuilder.fromUri(url).build();
 		target = client.target(baseURI);
-		config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
-		config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
+		//config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+		//config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
 	}
 	
 	@Override
 	public List<String> list(String prefix) {
 		
-		Response response = target.path("/namenode/list/").queryParam("prefix", prefix).request().get();
-
+		Response response = target.path("/namenode/list/").queryParam("prefix", prefix)
+				.request()
+				.get();
 		if (response.hasEntity()) {
 			List<String> data = response.readEntity(List.class);
 			return data;
@@ -85,7 +86,9 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void update(String name, List<String> blocks) {
-		Response response = target.path("/namenode/" + name).request().put(Entity.entity(name, MediaType.APPLICATION_JSON_TYPE));
+		Response response = target.path("/namenode/" + name)
+				.request()
+				.put(Entity.entity(name, MediaType.APPLICATION_JSON_TYPE));
 		if( names.putIfAbsent( name, new ArrayList<>(blocks)) == null ) {
 			logger.info("NOT FOUND");
 		}else
@@ -99,8 +102,13 @@ public class NamenodeClient implements Namenode {
 		Response response = target.path("/namenode/" + name)
 				.request()
 				.get();
+		if (response.hasEntity()) {
+			List<String> data = response.readEntity(List.class);
+			return data;
+		} else
+			System.err.println(response.getStatus());
+		return new ArrayList<String>();
 
-		return response.readEntity(List.class);
 		
 	}
 }
