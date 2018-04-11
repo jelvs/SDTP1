@@ -46,6 +46,7 @@ public class BufferedBlobWriter implements BlobWriter {
 			if( eob ) {
 				namenode.create(name, blocks);
 				blocks.clear();
+				
 			}
 		}
 	}
