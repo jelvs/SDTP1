@@ -21,6 +21,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import api.storage.Datanode;
+import utils.IP;
 import utils.Random;
 
 /*
@@ -57,7 +58,9 @@ public class DatanodeResources implements Datanode {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return baseURI + "datanode/" + id;
+	
 	}
 
 	@Override

@@ -35,7 +35,6 @@ public class BufferedBlobWriter implements BlobWriter {
 		this.name = name;
 		this.namenode = namenode;
 		this.datanodes = datanodes;
-
 		this.blockSize = blockSize;
 		this.buf = new ByteArrayOutputStream( blockSize );
 	}

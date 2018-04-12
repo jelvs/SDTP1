@@ -136,6 +136,7 @@ public class RestBlobStorage implements BlobStorage {
 		String message = new String(request.getData());
 		if(localMessage.equals(DATANODE_MESSAGE)){
 			String url = String.format(message);
+			System.out.println("url: :" + url);
 			addDataNodeServer(url);
 		}
 		else if(localMessage.equals(NAMENODE_MESSAGE)) {

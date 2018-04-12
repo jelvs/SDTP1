@@ -36,7 +36,6 @@ public class BufferedBlobReader implements BlobReader {
 		this.name = name;
 		this.namenode = namenode;
 		this.datanodes = datanodes;
-
 		this.blocks = this.namenode.read( name ).iterator();
 		this.lazyBlockIterator = new LazyBlockReader();
 	}
@@ -63,7 +62,7 @@ public class BufferedBlobReader implements BlobReader {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 		if(namenode.equals(name)) {
 			for(DatanodeClient x : datanodes.values()) {
-
+				//System.out.println("datanodes size : " + datanodes.size());
 				data = x.readBlock( block );
 				try {
 					outputStream.write(data);

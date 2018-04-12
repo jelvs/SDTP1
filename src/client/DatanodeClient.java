@@ -22,8 +22,8 @@ public class DatanodeClient implements Datanode {
 	private Client client;
 	private URI baseURI;
 	private WebTarget target;
-	final int CONNECT_TIMEOUT = 2000;
-	final int READ_TIMEOUT = 2000;
+	//final int CONNECT_TIMEOUT = 2000;
+	//final int READ_TIMEOUT = 2000;
 	
 	public DatanodeClient(String url) {
 		
@@ -31,8 +31,8 @@ public class DatanodeClient implements Datanode {
 		config = new ClientConfig();
 		client = ClientBuilder.newClient(config);
 		target = client.target(baseURI);
-		config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
-		config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
+		//config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
+		//config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
 	}
 	
 	@Override
