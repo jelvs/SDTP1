@@ -22,10 +22,9 @@ import api.storage.Namenode;
 
 public class NamenodeClient implements Namenode {
 
-	private ClientConfig config;
-	private Client client;
+	
 	private URI baseURI;
-	private WebTarget target;
+	
 	//final int CONNECT_TIMEOUT = 2000;
 	//final int READ_TIMEOUT = 2000;
 	
@@ -35,17 +34,18 @@ public class NamenodeClient implements Namenode {
 	
 	public NamenodeClient(String url) {
 		
-		config = new ClientConfig();
-		client = ClientBuilder.newClient(config);
+		
 		baseURI = UriBuilder.fromUri(url).build();
-		target = client.target(baseURI);
+		
 		//config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT);
 		//config.property(ClientProperties.READ_TIMEOUT, READ_TIMEOUT);
 	}
 	
 	@Override
 	public List<String> list(String prefix) {
-		
+		ClientConfig config = new ClientConfig();
+		Client client = ClientBuilder.newClient(config);
+		WebTarget target = client.target(baseURI);
 		Response response = target.path("namenode/list/").queryParam("prefix", prefix)
 				.request()
 				.get();
@@ -64,10 +64,14 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void create(String name,  List<String> blocks) {
-		Response response2 = target.path("/namenode/" + name)
+		ClientConfig config = new ClientConfig();
+		Client client = ClientBuilder.newClient(config);
+		WebTarget target = client.target(baseURI);
+		Response response2 = target.path("namenode/" + name)
 				.request()
-				.post(Entity.entity(blocks, MediaType.APPLICATION_JSON_TYPE));
+				.post(Entity.entity(blocks, MediaType.APPLICATION_JSON));
 
+		
 		if (response2.hasEntity()) {
 			String id = response2.readEntity(String.class);
 			System.out.println("data resource id: " + id);
@@ -79,7 +83,13 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void delete(String prefix) {
-		Response response3 = target.path("/namenode/list/").queryParam("prefix", prefix).request().delete();
+		ClientConfig config = new ClientConfig();
+		Client client = ClientBuilder.newClient(config);
+		WebTarget target = client.target(baseURI);
+		
+		
+		
+		Response response3 = target.path("namenode/list/").queryParam("prefix", prefix).request().delete();
 		if (response3.getStatusInfo().equals(Response.Status.NO_CONTENT)) {
 			System.out.println("deleted data resource...");
 		} else
@@ -89,9 +99,14 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void update(String name, List<String> blocks) {
-		Response response = target.path("/namenode/" + name)
+		ClientConfig config = new ClientConfig();
+		Client client = ClientBuilder.newClient(config);
+		WebTarget target = client.target(baseURI);
+		
+		
+		Response response = target.path("namenode/" + name)
 				.request()
-				.put(Entity.entity(name, MediaType.APPLICATION_JSON_TYPE));
+				.put(Entity.entity(name, MediaType.APPLICATION_JSON));
 		if( names.putIfAbsent( name, new ArrayList<>(blocks)) == null ) {
 			logger.info("NOT FOUND");
 		}else
@@ -102,7 +117,12 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public List<String> read(String name) {
-		Response response = target.path("/namenode/" + name)
+		ClientConfig config = new ClientConfig();
+		Client client = ClientBuilder.newClient(config);
+		WebTarget target = client.target(baseURI);
+		
+		
+		Response response = target.path("namenode/" + name)
 				.request()
 				.get();
 		if (response.hasEntity()) {

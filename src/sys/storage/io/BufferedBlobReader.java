@@ -59,23 +59,13 @@ public class BufferedBlobReader implements BlobReader {
 
 	private List<String> fetchBlockLines(String block) {
 		byte[] data  = null;
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		if(namenode.equals(name)) {
-			for(DatanodeClient x : datanodes.values()) {
-				//System.out.println("datanodes size : " + datanodes.size());
-				data = x.readBlock( block );
-				try {
-					outputStream.write(data);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-
-			}data = outputStream.toByteArray( );}
-
+		String [] s = block.split("datanode\\/");
+		System.out.println("\n BLOCKK :: " + block);
+		
+		data = datanodes.get(s[0]).readBlock(s[1]);
+	
 		return Arrays.asList( new String(data).split("\\R"));
-
+			
 
 	}
 

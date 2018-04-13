@@ -18,10 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class RestBlobStorage implements BlobStorage {
 	private static final int BLOCK_SIZE = 512;
-	private static URI baseURI ;
 	private static final int SOCKET_TIMEOUT = 10000;
 	private static final int MAX_DATAGRAM_SIZE = 65536;
-	private static final String HEARTBEAT_MESSAGE = "ImAlive....";
 	private static final String NAMENODE_MESSAGE = "Namenode";
 	private static final String DATANODE_MESSAGE = "Datanode";
 	private static final String MULTICAST_ADDRESS = "238.69.69.69";
@@ -38,10 +36,12 @@ public class RestBlobStorage implements BlobStorage {
 	}
 
 	public void addDataNodeServer(String datanode) {	
+		//System.out.println("blobStaddDatan : "+ datanode);
 		datanodes.putIfAbsent(datanode, new DatanodeClient(datanode));
 	}
 
 	public void addNameNodeServer(String namenode) {
+		//System.out.println("blobStaddNAME : "+ namenode);
 		this.namenode = new NamenodeClient(namenode);
 	}
 
@@ -90,7 +90,7 @@ public class RestBlobStorage implements BlobStorage {
 
 					DiscoverData(request, NAMENODE_MESSAGE );
 
-					System.out.write( request.getData(), 0, request.getLength() ) ;
+					System.out.write( request.getData(), 0 , request.getLength() ) ;
 						
 					//Thread.sleep(10000);
 				} catch (SocketTimeoutException e) {
@@ -115,7 +115,7 @@ public class RestBlobStorage implements BlobStorage {
 
 					DiscoverData(request, DATANODE_MESSAGE );
 
-					System.out.write( request.getData(), 0, request.getLength() ) ;
+					System.out.write( request.getData(), 0 , request.getLength() ) ;
 					
 					//Thread.sleep(10000);
 				} catch (SocketTimeoutException e) {
@@ -133,10 +133,10 @@ public class RestBlobStorage implements BlobStorage {
 	 */
 	private void DiscoverData(DatagramPacket request, String localMessage) {
 		
-		String message = new String(request.getData());
+		String message = new String(request.getData(), 0 , request.getLength());
 		if(localMessage.equals(DATANODE_MESSAGE)){
-			String url = String.format(message);
-			System.out.println("url: :" + url);
+			String url = message;
+			//System.out.println("url: :" + url);
 			addDataNodeServer(url);
 		}
 		else if(localMessage.equals(NAMENODE_MESSAGE)) {

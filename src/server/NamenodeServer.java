@@ -25,7 +25,6 @@ public class NamenodeServer {
 		System.setProperty("java.net.preferIPv4Stack", "true");
 
 		//create Server
-		badjoraz = "http://"+ IP.hostAddress() + ":8081/";
 		baseURI = URI.create(String.format("http://" + IP.hostAddress() + ":8081/"));
 		System.out.println(baseURI );
 		ResourceConfig config = new ResourceConfig();
@@ -47,7 +46,7 @@ public class NamenodeServer {
 				MulticastSocket socket = new MulticastSocket( 9000 );
 				socket.joinGroup(group);
 				int counter = 0;
-				while(counter ==0) {
+				while(counter==0) {
 					byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 					DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 					socket.receive( request );
@@ -56,7 +55,7 @@ public class NamenodeServer {
 					System.out.write(request.getData(), 0, request.getLength()) ;
 					//prepare and send reply... (unicast)
 					if(requested.contains("Namenode")) {
-						System.out.println(requested + "passou");
+						//System.out.println(requested + "passou");
 						processMessage(socket, request);
 						counter ++;
 					}
@@ -84,18 +83,20 @@ public class NamenodeServer {
 			}
 			MulticastSocket socket = new MulticastSocket( 9000 );
 			socket.joinGroup(group);
-			byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
-			DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
-			socket.receive( request );
-			String requested = new String(request.getData(), 0,request.getLength());
+			while(true) {
+				byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
+				DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
+				socket.receive( request );
+				String requested = new String(request.getData(), 0,request.getLength());
 
-			System.out.write(request.getData(), 0, request.getLength()) ;
+				System.out.write(request.getData(), 0, request.getLength()) ;
 
-			//prepare and send reply... (unicast)
-			if(requested.contains("Namenode")) {
-				processMessage(socket, request);
-			}  
-			Thread.sleep(1000);
+				//prepare and send reply... (unicast)
+				if(requested.contains("Namenode")) {
+					processMessage(socket, request);
+				}  
+				Thread.sleep(1000);
+			}
 		}catch (IOException e) {
 			e.printStackTrace();
 		}catch (InterruptedException e) {
@@ -107,7 +108,7 @@ public class NamenodeServer {
 
 
 	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
-		
+
 		byte[] buffer = baseURI.toString().getBytes() ;
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 		socket.send(reply);
@@ -115,7 +116,7 @@ public class NamenodeServer {
 
 
 
-		
+
 	}
 
 

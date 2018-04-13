@@ -29,7 +29,7 @@ public class DatanodeServer {
 
 		System.err.println("Server ready....");
 
-		
+
 
 		for (int i = 0; i < NUM_TRIES; i++) {
 			try {
@@ -47,7 +47,7 @@ public class DatanodeServer {
 					byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 					DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 					socket.receive( request );
-					String requested = new String(request.getData(), 0,request.getLength());
+					String requested = new String(request.getData(), 0 ,request.getLength());
 					System.out.write( request.getData() , 0, request.getLength() ) ;
 					//prepare and send reply... (unicast)
 					if(requested.contains("Datanode")) {
@@ -77,10 +77,11 @@ public class DatanodeServer {
 			}
 			MulticastSocket socket = new MulticastSocket( 9000 );
 			socket.joinGroup(group);
+
 			byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
 			DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
 			socket.receive( request );
-			String requested = new String(request.getData(), 0,request.getLength());
+			String requested = new String(request.getData(), 0, request.getLength());
 
 			System.out.write(request.getData(), 0, request.getLength()) ;
 
@@ -89,6 +90,7 @@ public class DatanodeServer {
 				processMessage(socket, request);
 			}  
 			Thread.sleep(1000);
+
 		}catch (IOException e) {
 			e.printStackTrace();
 		}catch (InterruptedException e) {
@@ -101,7 +103,7 @@ public class DatanodeServer {
 
 
 	private static void processMessage(MulticastSocket socket, DatagramPacket request) throws IOException {
-		
+
 		byte[] buffer = baseURI.toString().getBytes() ;
 		DatagramPacket reply = new DatagramPacket(buffer, buffer.length, request.getAddress(), request.getPort());
 		socket.send(reply);

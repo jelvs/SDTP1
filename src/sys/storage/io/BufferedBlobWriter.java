@@ -1,9 +1,11 @@
 package sys.storage.io;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,14 +42,22 @@ public class BufferedBlobWriter implements BlobWriter {
 	}
 
 	private void flush( byte[] data, boolean eob ) {
+		/*Random random = new Random();
+		List<String> keys = new ArrayList<String>(datanodes.keySet());
+		String randomKey = keys.get(random.nextInt(keys.size()));
+		blocks.add(datanodes.get(randomKey).createBlock(data));
+		*/
 		for (Entry<String, DatanodeClient> url : datanodes.entrySet()) {
-			blocks.add(datanodes.get(url.getKey()).createBlock(data));
-			if( eob ) {
-				namenode.create(name, blocks);
-				blocks.clear();
-				
-			}
+				List<String> keys = new ArrayList<String>();
+				keys.add(url.getKey());
+				Collections.shuffle(keys);
+				blocks.add(datanodes.get(keys.get(0)).createBlock(data));
 		}
+		if( eob ) {
+			namenode.create(name, blocks);
+			blocks.clear();
+		}
+
 	}
 
 	@Override
