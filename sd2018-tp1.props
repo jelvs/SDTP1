@@ -1,0 +1,9 @@
+namenode-mainclass=server.NamenodeServer
+namenode-port=8081
+datanode-mainclass=server.DatanodeServer
+datanode-port=8080
+computenode-mainclass=sys.mapreduce.ComputeNodeServer
+computenode-port=6666
+blobstorage-class=sys.storage.RestBlobStorage
+discovery-multicast-address=238.69.69.69:9000
+datanode-gc-timeout=30
