@@ -1,4 +1,4 @@
-# 1ºProjeto de Sistemas Distribuídos(Distributed Systems 1ºProject)
+# Distributed Systems 1ºProject
 
 # Objectivo
 
